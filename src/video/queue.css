@@ -1,0 +1,349 @@
+/*
+ * The page's queue (src/video/shared/queue.tsx): the drawer of Chapters and Up Next over the picture, and the Up
+ * Next card at a film's end. Both are drawn in the controls' content between the center buttons and the bar, over the
+ * picture in Cinema and in the picture's area of the Suite's grid. Colors are fenced to forced-colors: none, as in lightline.css: cyan is the next
+ * move (Play now, the count, focus). Brief: design/page.md.
+ */
+@layer components, lightline;
+
+@layer lightline {
+  @scope (.media-skin.lightline[data-theme="scaffold"][data-preset="video"]) {
+    .lightline-queue-drawer,
+    .lightline-up-next {
+      position: absolute;
+      box-sizing: border-box;
+      border: 1px solid;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    /* ---------- The drawer ---------- */
+
+    /* In Cinema it keeps clear of the top row (its own button stays in sight) and of the bar. */
+    .lightline-queue-drawer {
+      z-index: 45;
+      inset-block: 56px 96px;
+      inset-inline-end: 8px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      inline-size: min(20rem, 100% - 16px);
+      padding: 10px 12px 12px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+
+    :scope[data-layout="suite"] .lightline-queue-drawer {
+      grid-row: pic;
+      grid-column: frame;
+      inset-block: 8px;
+      justify-self: end;
+    }
+
+    .lightline-queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .lightline-queue-title,
+    .lightline-queue-heading {
+      margin: 0;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .lightline-queue-list {
+      display: grid;
+      gap: 4px;
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .lightline-queue-close,
+    .lightline-queue-chapter,
+    .lightline-queue-film,
+    .lightline-up-next-actions > button {
+      border: 1px solid;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .lightline-queue-close {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .lightline-queue-chapter,
+    .lightline-queue-film {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      inline-size: 100%;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-align: start;
+    }
+
+    .lightline-queue-chapter > :first-child,
+    .lightline-queue-film > :nth-child(2) {
+      flex: 1;
+      min-inline-size: 0;
+    }
+
+    .lightline-queue-time,
+    .lightline-up-next-length,
+    .lightline-up-next-number {
+      font-family: var(--lightline-font-record);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lightline-queue-time {
+      font-size: 12px;
+    }
+
+    .lightline-queue-still {
+      flex: none;
+      inline-size: 64px;
+      aspect-ratio: 16 / 9;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
+    /* ---------- Up Next ---------- */
+
+    .lightline-up-next {
+      z-index: 40;
+      inset-inline-end: 16px;
+      inset-block-end: 96px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "still text count" "still actions actions";
+      align-items: center;
+      gap: 8px 12px;
+      inline-size: min(26rem, 100% - 32px);
+      padding: 12px;
+    }
+
+    /* In the room the controls' content is laid out in the room's grid, the card with it, in the picture's area. */
+    :scope[data-layout="suite"] .lightline-up-next {
+      grid-row: pic;
+      grid-column: frame;
+      align-self: end;
+      justify-self: end;
+      inset-block-end: 16px;
+    }
+
+    .lightline-up-next-still {
+      grid-area: still;
+      inline-size: 128px;
+      aspect-ratio: 16 / 9;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .lightline-up-next-text {
+      grid-area: text;
+      display: grid;
+      gap: 2px;
+    }
+
+    .lightline-up-next-label {
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .lightline-up-next-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .lightline-up-next-length {
+      font-size: 12px;
+    }
+
+    .lightline-up-next-count {
+      grid-area: count;
+      display: grid;
+      place-items: center;
+      inline-size: 36px;
+      block-size: 36px;
+    }
+
+    .lightline-up-next-count > * {
+      grid-area: 1 / 1;
+    }
+
+    .lightline-up-next-ring {
+      inline-size: 36px;
+      block-size: 36px;
+      transform: rotate(-90deg);
+    }
+
+    .lightline-up-next-ring circle {
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .lightline-up-next-ring-run {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 0;
+      animation: lightline-up-next-count 5s linear forwards;
+    }
+
+    @keyframes lightline-up-next-count {
+      to {
+        stroke-dashoffset: 100;
+      }
+    }
+
+    .lightline-up-next-number {
+      font-size: 14px;
+    }
+
+    .lightline-up-next-actions {
+      grid-area: actions;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .lightline-up-next-actions > button {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* A small player: the drawer takes the whole picture, the card drops its frame and sits just above the bar. */
+    @container media-root (width < 30rem) {
+      .lightline-queue-drawer {
+        inset-block: 8px;
+      }
+
+      .lightline-up-next {
+        inset-inline-end: 8px;
+        inset-block-end: 64px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "text count" "actions actions";
+        inline-size: calc(100% - 16px);
+        padding: 8px 10px;
+      }
+
+      .lightline-up-next-still,
+      .lightline-up-next-length {
+        display: none;
+      }
+
+      .lightline-up-next-actions > button {
+        padding: 4px 10px;
+      }
+    }
+
+    /* Under reduced motion the count is a number, not a moving ring. */
+    @media (prefers-reduced-motion: reduce) {
+      .lightline-up-next-ring {
+        display: none;
+      }
+    }
+
+    :is(.lightline-queue-close, .lightline-queue-chapter, .lightline-queue-film, .lightline-up-next-actions > button):focus-visible {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+
+    /* ---------- Colors ---------- */
+
+    @media (forced-colors: none) {
+      .lightline-queue-drawer,
+      .lightline-up-next {
+        color: var(--lightline-text);
+        background: var(--lightline-pane);
+        border-color: var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+        scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+      }
+
+      .lightline-queue-title,
+      .lightline-queue-heading,
+      .lightline-queue-time,
+      .lightline-up-next-label,
+      .lightline-up-next-length {
+        color: var(--lightline-muted);
+      }
+
+      .lightline-queue-close,
+      .lightline-queue-chapter,
+      .lightline-queue-film,
+      .lightline-up-next-cancel {
+        border-color: rgb(255 255 255 / 0.18);
+      }
+
+      .lightline-queue-chapter,
+      .lightline-queue-film {
+        border-color: transparent;
+      }
+
+      :is(.lightline-queue-close, .lightline-queue-chapter, .lightline-queue-film, .lightline-up-next-cancel):hover {
+        border-color: rgb(255 255 255 / 0.4);
+      }
+
+      .lightline-queue-chapter[aria-current="true"] {
+        border-color: var(--lightline-cyan);
+        color: var(--lightline-cyan);
+      }
+
+      .lightline-up-next-play {
+        border-color: var(--lightline-cyan);
+        color: var(--lightline-cyan);
+      }
+
+      .lightline-up-next-play:hover {
+        background: rgb(110 232 233 / 0.12);
+      }
+
+      .lightline-up-next-ring-track {
+        stroke: rgb(255 255 255 / 0.18);
+      }
+
+      .lightline-up-next-ring-run {
+        stroke: var(--lightline-cyan);
+      }
+
+      :is(.lightline-queue-close, .lightline-queue-chapter, .lightline-queue-film, .lightline-up-next-actions > button):focus-visible {
+        outline-color: var(--lightline-cyan);
+      }
+    }
+
+    /* Forced colors: the system's colors, a border on every button, the ring drawn in the text color. */
+    @media (forced-colors: active) {
+      .lightline-queue-drawer,
+      .lightline-up-next {
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      .lightline-up-next-ring circle {
+        stroke: CanvasText;
+      }
+
+      .lightline-queue-chapter[aria-current="true"] {
+        border-color: Highlight;
+      }
+    }
+  }
+}

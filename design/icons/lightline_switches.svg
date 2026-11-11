@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 30.8.2, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1" id="Ledger_icons" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" viewBox="0 0 18 18" enable-background="new 0 0 18 18" xml:space="preserve">
+<g id="switches">
+	<path fill="none" stroke="#F2F0EA" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M2.75,5.75L2.75,5.75c0-1.375,1.125-2.5,2.5-2.5h7.5c1.375,0,2.5,1.125,2.5,2.5v0c0,1.375-1.125,2.5-2.5,2.5h-7.5
+		C3.875,8.25,2.75,7.125,2.75,5.75z"/>
+	<circle fill="#F2F0EA" cx="12.75" cy="5.75" r="1.35"/>
+	<path fill="none" stroke="#F2F0EA" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M2.75,12.25L2.75,12.25c0-1.375,1.125-2.5,2.5-2.5h7.5c1.375,0,2.5,1.125,2.5,2.5v0c0,1.375-1.125,2.5-2.5,2.5h-7.5
+		C3.875,14.75,2.75,13.625,2.75,12.25z"/>
+	
+		<circle fill="none" stroke="#F2F0EA" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" cx="5.25" cy="12.25" r="1.35"/>
+</g>
+</svg>

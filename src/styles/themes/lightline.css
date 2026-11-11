@@ -1,0 +1,103 @@
+/*
+ * Lightline tokens. The colors are Lightline's own, from its logo (the owner's pick of 2026-11-09, in place of
+ * FredericK DesigN StudiO's identity sheet): the line's cyan and blue, white, grays and a teal glass on a near-black
+ * ground; grayscale at rest, and a saturated color only where it names a state. Waiting and done take their own hues
+ * in the logo's light (the owner's pick of 2026-11-09, about 7:03 PM): an amber and a teal-leaning green, about as
+ * light and as saturated as the line's cyan, so "orange" and "green" stay true. Scaffold stays the structural base; these sit in
+ * the same layer at a higher specificity, so the preferences layer (reduced motion, reduced transparency)
+ * still wins over them, and forced colors keeps Scaffold's own system colors.
+ */
+@layer base.theme, base.preset, base.preferences;
+
+@layer base.preset {
+  @media (forced-colors: none) {
+    .media-skin.lightline[data-theme="scaffold"] {
+      /* Lightline's palette, from its logo. */
+      --lightline-ground: #060a0e;
+      --lightline-text: #ffffff;
+      --lightline-muted: #8d959c;
+      --lightline-muted-lit: #c9d0d6;
+      --lightline-ink: #060a0e;
+      --lightline-pane-from: #0f2a30;
+      --lightline-pane-to: #081014;
+      --lightline-cyan: #6ee8e9;
+      --lightline-blue: #7eb0e6;
+      --lightline-orange: #fdb877;
+      --lightline-green: #7ae2a7;
+      --lightline-magenta: #ff5ad9;
+
+      /* Type: body, labels, and anything that is part of a record. The public --media-font-family is left
+         unset so a host's value always wins; Inter is only the fallback. A host page can also hand in its own
+         loaded families through --lightline-font-body and --lightline-font-heading. */
+      --lightline-font-body-stack: var(--lightline-font-body, Inter, ui-sans-serif, system-ui, sans-serif);
+      --lightline-font-label: var(--lightline-font-heading, Montserrat, ui-sans-serif, system-ui, sans-serif);
+      --lightline-font-record: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+
+      /* The public accent properties keep working; cyan and ink are only their defaults, so the accent
+         text never falls back to contrast-color(). */
+      --media-default-accent-color: var(--lightline-cyan);
+      --media-accent-foreground: var(--media-accent-text-color, var(--lightline-ink));
+      --media-primary-foreground: var(--media-accent-text-color, var(--lightline-ink));
+
+      --media-foreground: var(--lightline-text);
+      --media-muted: rgb(255 255 255 / 0.22);
+      --media-popover: rgb(8 16 20 / 0.86);
+      --media-popover-foreground: var(--lightline-text);
+      --media-button-highlight: rgb(255 255 255 / 0.08);
+
+      /* Corners: 16 px on panes, 8 px on buttons and rows, pills fully round. */
+      --media-control-radius: 8px;
+      --media-menu-item-radius: 8px;
+      --media-popup-radius: 16px;
+      --media-dialog-radius: 16px;
+
+      /* The glass pane. */
+      --lightline-pane: linear-gradient(180deg, rgb(15 42 48 / 0.74), rgb(8 16 20 / 0.8));
+      --lightline-pane-edge: rgb(255 255 255 / 0.12);
+      --lightline-pane-blur: blur(12px) saturate(120%);
+      --lightline-glow-cyan: 0 0 18px rgb(110 232 233 / 0.35);
+
+      /* The Suite's glass: frosted and see-through, so the lit room shows softly through the rails' panels. A
+         faint light frost over a thin tint; `--lightline-glass-opacity` (a host's, 0 to 1) is how much of the tint
+         covers the room, held to 0.3 to 0.9 (GLASS in src/video/suite/glass.ts, in percent see-through), where the words keep 4.5 to 1 over the lightest room behind them
+         (measured by checks/suite-glass.mjs). */
+      --lightline-glass-tint: clamp(0.3, var(--lightline-glass-opacity, 0.42), 0.9);
+      --lightline-glass:
+        linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.03)),
+        linear-gradient(180deg, rgb(15 42 48 / calc(var(--lightline-glass-tint) * 0.85)), rgb(8 16 20 / var(--lightline-glass-tint)));
+      /* The glass darkens what it shows by the room's lift (src/video/suite.css), so behind the words the room is as
+         bright as the measured one whatever the margins show. */
+      --lightline-glass-blur: blur(14px) brightness(calc(1 / var(--lightline-room-lift, 1)));
+
+      /* Lightline: how fast the film's light follows the picture, and how long the one-shot effects run.
+         Reduced motion collapses all three below. */
+      --lightline-duration-ambient: 700ms;
+      --lightline-duration-flare: 700ms;
+      --lightline-duration-sweep: 1200ms;
+      /* The Suite's room takes the film's light slower than the glow, so a cut never steps the whole room. */
+      --lightline-duration-room: 1600ms;
+    }
+  }
+}
+
+@layer base.preferences {
+  @media (forced-colors: none) and (prefers-reduced-motion: reduce) {
+    .media-skin.lightline[data-theme="scaffold"] {
+      --lightline-duration-ambient: 0ms;
+      --lightline-duration-flare: 0ms;
+      --lightline-duration-sweep: 0ms;
+      --lightline-duration-room: 0ms;
+    }
+  }
+
+  @media (forced-colors: none) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more)) {
+    .media-skin.lightline[data-theme="scaffold"] {
+      --lightline-pane: linear-gradient(180deg, var(--lightline-pane-from), var(--lightline-pane-to));
+      --lightline-pane-edge: rgb(255 255 255 / 0.35);
+      --lightline-pane-blur: none;
+      --lightline-glass: var(--lightline-pane);
+      --lightline-glass-blur: none;
+      --media-popover: var(--lightline-pane-to);
+    }
+  }
+}

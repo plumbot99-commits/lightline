@@ -1,0 +1,39 @@
+{
+  "name": "lightline",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:page": "vite --config vite.page.config.ts",
+    "build": "vite build --config vite.page.config.ts && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "deploy": "node apps/preview/deploy.mjs",
+    "deploy:vercel": "npx --yes vercel@64 build && npx --yes vercel@64 deploy --prebuilt",
+    "deploy:netlify": "npx --yes netlify-cli@27 deploy --build",
+    "deploy:cloudflare": "npm run build && npx --yes wrangler@4 pages deploy dist --project-name ledger"
+  },
+  "dependencies": {
+    "@videojs/core": "10.3.0",
+    "@videojs/react": "10.3.0",
+    "cn": "^0.4.0",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@base-ui/react": "^1.6.0",
+    "@heroicons/react": "^2.2.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@videojs/mux-video": "10.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "class-variance-authority": "^0.7.1",
+    "playwright": "1.62.1",
+    "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

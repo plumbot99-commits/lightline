@@ -1,0 +1,1308 @@
+/*
+ * Lightline part 4, the Suite: the room's layout over Cinema's. The container becomes a grid: the frame (the
+ * picture, its top row above it and its bar below it) in the middle, four rails around it. Everything that was
+ * drawn over the whole player is drawn over the picture's own area instead, so nothing but a guide the viewer
+ * turns on covers the picture. Colors are fenced to forced-colors: none, as in lightline.css. Brief: design/suite.md.
+ */
+@layer components, lightline;
+
+/* The room's four lights, registered so a change fades (a transition on a gradient alone does nothing). */
+@property --lightline-room-tl {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --lightline-room-tr {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --lightline-room-bl {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --lightline-room-br {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+/* The side rails' width in pixels, read by the skin's measure of the film's width between them (suite.tsx). */
+@property --lightline-rail-px {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@layer lightline {
+  @scope (.media-skin.lightline[data-theme="scaffold"][data-preset="video"]) {
+    :scope[data-layout="suite"] {
+      --lightline-rail-size: 20rem;
+      --lightline-rail-px: var(--lightline-rail-size);
+      /* The room's margins: around the panels, between them and between the rails and the frame, wide enough that
+         the room shows around every panel as in his picture (36 px at 1920 wide, 27 at 1440, never under 16). The
+         frame's own top row and bar keep the tighter gap they were drawn with. */
+      --lightline-room-gap: clamp(16px, 1.875vw, 40px);
+      --lightline-frame-gap: 12px;
+      /* The room's height is its rows'; a ratio a host page sets on the player (the workbench's, unlayered) is the
+         frame's shape in Cinema, so the room sets it aside. */
+      aspect-ratio: auto !important;
+      display: grid;
+      grid-template-columns: [left] auto [frame] minmax(0, 1fr) [right] auto;
+      /* The room is never taller than the viewport: the picture's row gives up what the rails above and below the
+         frame take (a bottom rail of two rows of chapters at 1920 by 1080 ran past the screen's foot). */
+      grid-template-rows: [top] auto [ftop] auto [pic] minmax(12rem, 1fr) [fbot] auto [bottom] auto;
+      max-block-size: 100svh;
+      box-sizing: border-box;
+      padding: var(--lightline-room-gap);
+      font-size: 13px;
+    }
+
+    /* The picture's area holds what Cinema draws over the whole player: the video, the poster, the light. */
+    :scope[data-layout="suite"] > *,
+    :scope[data-layout="suite"] > .media-buffering-indicator-controls > * {
+      grid-row: pic;
+      grid-column: frame;
+    }
+
+    :scope[data-layout="suite"] > video {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* The picture's own place: the frame's width at the film's shape, no taller than the row the room leaves it
+       (the video letterboxes inside it, and the guides follow the video). Where the side rails make the row taller
+       than the film's shape, it fills the row as the video does, so the drawer and the up-next card, which fill it
+       too, stay on the picture. */
+    :scope[data-layout="suite"] > .lightline-suite-picture {
+      inline-size: 100%;
+      aspect-ratio: 16 / 9;
+      align-self: stretch;
+      min-block-size: 12rem;
+      max-block-size: 100%;
+      pointer-events: none;
+    }
+
+    /* The frame's box, measured by the drag and by the floating panels. */
+    :scope[data-layout="suite"] > .lightline-suite-frame {
+      position: absolute;
+      inset: 0;
+      grid-row: ftop / bottom;
+      grid-column: frame;
+      pointer-events: none;
+    }
+
+    /* The controls sit in the dark: the top row above the picture, the bar below it, both always up. */
+    :scope[data-layout="suite"] > .video-controls-content {
+      display: contents;
+    }
+
+    :scope[data-layout="suite"] .video-controls-top {
+      position: relative;
+      inset: auto;
+      grid-row: ftop;
+      grid-column: frame;
+      padding: 0 0 var(--lightline-frame-gap);
+    }
+
+    :scope[data-layout="suite"] .video-controls-bottom {
+      position: relative;
+      inset: auto;
+      grid-row: fbot;
+      grid-column: frame;
+      margin-block-start: var(--lightline-frame-gap);
+    }
+
+    /* Nothing over the picture: no center buttons, no gradient, no spinner (the state pill and the Stream panel
+       say Loading). The key feedback shows in the top row's middle, over no picture. */
+    :scope[data-layout="suite"] :is(.video-controls-center, .video-controls-backdrop, .media-buffering-indicator) {
+      display: none !important;
+    }
+
+    :scope[data-layout="suite"] > :is(.media-indicator-group, .lightline-hold-badge) {
+      grid-row: ftop;
+    }
+
+    /* In Cinema the key feedback drops below the top row; in the room it sits in the row's middle, off the picture. */
+    :scope[data-layout="suite"]
+      :is(.media-status-indicator, .media-volume-indicator, .media-seek-indicator, .media-seek-indicator[data-direction]) {
+      margin: 0;
+      align-self: center;
+    }
+
+    /* ---------- Fullscreen: the whole room fills the screen, and the picture takes what the rails leave ---------- */
+
+    :scope[data-layout="suite"]:fullscreen {
+      block-size: 100%;
+      max-block-size: none;
+      grid-template-rows: [top] auto [ftop] auto [pic] minmax(0, 1fr) [fbot] auto [bottom] auto;
+    }
+
+    :scope[data-layout="suite"]:fullscreen > .lightline-suite-picture {
+      max-block-size: none;
+      block-size: 100%;
+      aspect-ratio: auto;
+      min-block-size: 0;
+    }
+
+    /* ---------- The room: a plate behind the rails, lit by the film, and the stage that keeps the frame dark ---------- */
+
+    /* Drawn only where it can be seen through: never in forced colors, and gone (with the panes made solid by the
+       theme) under reduced transparency or more contrast. */
+    .lightline-room,
+    .lightline-room-stage {
+      display: none;
+    }
+
+
+    @media (forced-colors: none) and (not (prefers-contrast: more)) {
+      :scope[data-layout="suite"] > .lightline-room {
+        display: block;
+        position: absolute;
+        /* The whole room to its padding edge, not the picture's cell the room's other children take. */
+        grid-area: auto;
+        inset: 0;
+        overflow: hidden;
+        border-radius: inherit;
+        isolation: isolate;
+        pointer-events: none;
+      }
+
+      :scope[data-layout="suite"] > .lightline-room-stage {
+        display: block;
+        position: absolute;
+        grid-row: ftop / bottom;
+        grid-column: frame;
+        inset: 0;
+        border-radius: 16px;
+        background: var(--lightline-ground);
+        /* Close enough to cover its round corners under the top row and the bar, short enough that the room shows
+           in the margins beside the frame. */
+        box-shadow: 0 0 14px 6px var(--lightline-ground);
+        pointer-events: none;
+      }
+
+      /* The poster covers its whole box in the stage's color, and a pixel past it: where the film's edge falls on a
+         fraction of a pixel, the poster's picture and the video under it round it apart, and the film's first frame
+         (white, in The Rogue Render) showed as a bright line beside the poster. */
+      :scope[data-layout="suite"] > .media-poster {
+        background: var(--lightline-ground);
+        box-shadow: 0 0 0 1px var(--lightline-ground);
+      }
+    }
+
+    /* A viewer who asked for less transparency gets no room and no stage (the panes are solid then,
+       themes/lightline.css). Read apart from the block above, which names only what every engine knows: Safari 27
+       knows no prefers-reduced-transparency and answers false to any query that names it (measured 2026-11-09), so
+       a gate that named it never drew the room there. After the block, at its specificity, so it wins by order.
+       ROOM_QUERY and LESS_QUERY in suite/suite.tsx ask the same two things. */
+    @media (prefers-reduced-transparency: reduce) {
+      :scope[data-layout="suite"] > .lightline-room,
+      :scope[data-layout="suite"] > .lightline-room-stage {
+        display: none;
+      }
+    }
+
+    /* The plate: the host's picture or loop, or the skin's own light pools (no grid, no stock image), soft, bright
+       enough that the room is plainly a room around the panels and through them. A picture is gray; a loop and its
+       still keep their own color (`--lightline-room-gray: 0`, his pick of 2026-11-09). A host's room is exposed by the
+       skin (`--lightline-room-exposure`, so its lightest part lands at the same gray whatever the picture) and lifted
+       for the margins (`--lightline-room-lift`, so a dark picture reads as a place there), and the glass takes the
+       lift back off what it shows (`--lightline-glass-blur`), so the words see the room as they did. A host may set
+       `--lightline-room-dim` instead, which wins, or `--lightline-room-dim-by`, a share of the exposed brightness (1,
+       none, by default; a dimmer room only raises the glass's contrast). It overhangs the room so the blur leaves no
+       pale rim. */
+    .lightline-room-plate {
+      position: absolute;
+      inset: -32px;
+      background:
+        var(
+          --lightline-room-image,
+          radial-gradient(38% 52% at 10% 16%, rgb(255 255 255 / 0.5), transparent 72%),
+          radial-gradient(30% 44% at 90% 20%, rgb(255 255 255 / 0.42), transparent 72%),
+          radial-gradient(46% 40% at 50% 104%, rgb(255 255 255 / 0.36), transparent 72%),
+          radial-gradient(26% 36% at 86% 88%, rgb(255 255 255 / 0.3), transparent 72%),
+          radial-gradient(24% 30% at 14% 84%, rgb(255 255 255 / 0.26), transparent 72%)
+        )
+        center / cover no-repeat,
+        var(--lightline-ground);
+      filter: grayscale(var(--lightline-room-gray, 1))
+        brightness(var(--lightline-room-dim, calc(var(--lightline-room-exposure, 0.62) * var(--lightline-room-lift, 1) * var(--lightline-room-dim-by, 1))))
+        blur(4px);
+    }
+
+    /* The loop, over its still and under the plate's filter: shown once the skin has measured its frames. */
+    .lightline-room-loop {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity var(--lightline-duration-room) linear;
+    }
+
+    .lightline-room-loop[data-ready] {
+      opacity: 1;
+    }
+
+    /* The film's light stays in the frame in the Suite: no glow past the room's edge, the film's or a state's, whatever
+       the viewer's ambient setting (his words of 2026-11-09, about 8:36 PM: "on suite auto turn off the boundary color
+       it only looks good on cinema"). Cinema keeps the setting; theater's house lights stay. The states keep their light
+       inside the room: the paused rim and dim on the picture, the playhead, the ended sweep, the pill. */
+    @media (forced-colors: none) {
+      :scope[data-layout="suite"] {
+        box-shadow: var(--lightline-house);
+      }
+    }
+
+    /* The film's light on the room, for a host that asks for it: off unless the host sets `--lightline-room-light` (0
+       to 1) on the player (his words above; until 2026-11-09 it was on unless a host set 0, as the page did for its
+       Horizon room). Each corner the color of its quadrant of the ambient sample, through a color blend, which keeps
+       the plate's own lightness (the dark stays dark, the text's contrast does not move) and gives its light the
+       film's hue. It follows the sample's own steps, fading through the registered colors; the viewer's ambient
+       setting scales it, off leaves the plate in its own light and still, and reduced motion makes it a still. Where
+       it is off the skin does not sample the film in the Suite at all (shared/lightline.tsx). */
+    .lightline-room-light {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(farthest-corner at 0 0, var(--lightline-room-tl), transparent 75%),
+        radial-gradient(farthest-corner at 100% 0, var(--lightline-room-tr), transparent 75%),
+        radial-gradient(farthest-corner at 0 100%, var(--lightline-room-bl), transparent 75%),
+        radial-gradient(farthest-corner at 100% 100%, var(--lightline-room-br), transparent 75%);
+      mix-blend-mode: color;
+      opacity: calc(min(0.85, 0.7 * var(--lightline-spill, 1)) * clamp(0, var(--lightline-room-light, 0), 1));
+      transition:
+        --lightline-room-tl var(--lightline-duration-room) linear,
+        --lightline-room-tr var(--lightline-duration-room) linear,
+        --lightline-room-bl var(--lightline-duration-room) linear,
+        --lightline-room-br var(--lightline-duration-room) linear;
+    }
+
+    :scope[data-ambient="off"] > .lightline-room > .lightline-room-light {
+      display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lightline-room-light {
+        display: none;
+      }
+    }
+
+    /* ---------- The rails ---------- */
+
+    .lightline-rail {
+      display: flex;
+      gap: var(--lightline-room-gap);
+      min-inline-size: 0;
+      min-block-size: 0;
+    }
+
+    :scope[data-layout="suite"] > :is(.lightline-rail-left, .lightline-rail-right) {
+      grid-row: ftop / bottom;
+      flex-direction: column;
+      inline-size: var(--lightline-rail-size);
+      /* A side rail may make the picture's row taller, up to the room's cap at the viewport (the video letterboxes in
+         it, as in fullscreen); past that its panels share the height and scroll. */
+      contain: inline-size;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+
+    :scope[data-layout="suite"] > .lightline-rail-left {
+      grid-column: left;
+      margin-inline-end: var(--lightline-room-gap);
+    }
+
+    :scope[data-layout="suite"] > .lightline-rail-right {
+      grid-column: right;
+      margin-inline-start: var(--lightline-room-gap);
+    }
+
+    /* Panels on one line of the top or bottom rail end on one line: each stretches to the line's tallest. */
+    :scope[data-layout="suite"] > :is(.lightline-rail-top, .lightline-rail-bottom) {
+      grid-column: 1 / -1;
+      flex-flow: row wrap;
+      align-items: stretch;
+    }
+
+    :scope[data-layout="suite"] > .lightline-rail-top {
+      grid-row: top;
+      margin-block-end: var(--lightline-room-gap);
+    }
+
+    :scope[data-layout="suite"] > .lightline-rail-bottom {
+      grid-row: bottom;
+      margin-block-start: var(--lightline-room-gap);
+    }
+
+    /* Where the film would be too narrow between the side rails, their panels join the bottom rail (suite.tsx), and
+       the rail is held: one line, about a third of the screen's height, each panel scrolling what does not fit, as in
+       a side rail. A rail that grew would take the picture's row down to its floor and the film with it (the owner's
+       pick of 2026-11-09, design/layout.md). */
+    :scope[data-layout="suite"][data-panels-under] > .lightline-rail-bottom {
+      flex-wrap: nowrap;
+      max-block-size: calc(100svh / 3);
+    }
+
+    :scope[data-layout="suite"] > .lightline-rail[data-empty] {
+      margin: 0;
+    }
+
+    :scope[data-layout="suite"] > :is(.lightline-rail-left, .lightline-rail-right)[data-empty] {
+      inline-size: 0;
+    }
+
+    /* ---------- A panel ---------- */
+
+    .lightline-panel {
+      position: relative;
+      z-index: 35;
+      display: grid;
+      align-content: start;
+      gap: 8px;
+      box-sizing: border-box;
+      grid-template-rows: auto minmax(0, 1fr);
+      padding: 8px 12px 12px;
+      border-radius: 12px;
+      line-height: 1.3;
+    }
+
+    /* A panel given less height than its words take (a side rail shorter than the lab in Latvian, a floating panel
+       in a short room) keeps its title and its edge and scrolls its body, the scrollbar shown; the room makes the
+       body a tab stop while it scrolls. The padding keeps a control's focus ring inside the scroller. */
+    .lightline-panel-body {
+      min-block-size: 0;
+      margin: -4px;
+      padding: 4px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+
+    .lightline-panel-body:focus-visible {
+      outline: 2px solid;
+      outline-offset: -2px;
+    }
+
+    /* In a side rail the panels share the rail's height: each gives up what it must and scrolls the rest. */
+    :is(.lightline-rail-left, .lightline-rail-right) > .lightline-panel:not([data-floating]) {
+      flex: 0 1 auto;
+      min-block-size: 0;
+    }
+
+    /* The last docked panel in a side rail takes what the rail has left, so both side rails end level with the bar. */
+    :is(.lightline-rail-left, .lightline-rail-right) > .lightline-panel:nth-last-child(1 of :not([data-floating])) {
+      flex-grow: 1;
+    }
+
+    .lightline-rail-top > .lightline-panel:not([data-floating]),
+    .lightline-rail-bottom > .lightline-panel:not([data-floating]) {
+      flex: 1 1 18rem;
+    }
+
+    .lightline-rail-top > .lightline-panel-guides:not([data-floating]),
+    .lightline-rail-bottom > .lightline-panel-guides:not([data-floating]) {
+      flex: 3 1 28rem;
+    }
+
+    .lightline-panel[data-floating] {
+      position: absolute;
+      z-index: 40;
+      inline-size: var(--lightline-rail-size);
+      max-block-size: calc(100% - 2 * var(--lightline-room-gap));
+    }
+
+    .lightline-panel-guides[data-floating] {
+      inline-size: 32rem;
+    }
+
+    .lightline-panel[data-dragging] {
+      opacity: 0.45;
+    }
+
+    .lightline-panel-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lightline-panel-title {
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .lightline-panel-grip {
+      display: grid;
+      place-items: center;
+      inline-size: 28px;
+      block-size: 28px;
+      margin-inline-start: -6px;
+      padding: 0;
+      border: 0;
+      border-radius: 6px;
+      background: none;
+      color: inherit;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .lightline-panel-grip:active {
+      cursor: grabbing;
+    }
+
+    .lightline-panel-grip-icon {
+      inline-size: 10px;
+      block-size: 16px;
+      fill: currentColor;
+    }
+
+    .lightline-panel-note {
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .lightline-panel-button {
+      display: grid;
+      place-items: center;
+      inline-size: 32px;
+      block-size: 32px;
+      padding: 0;
+      border: 1px solid;
+      border-radius: 8px;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .lightline-panel-button:disabled {
+      cursor: default;
+      opacity: 0.4;
+    }
+
+    .lightline-panel-button svg {
+      inline-size: 16px;
+      block-size: 16px;
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+    }
+
+    :is(.lightline-panel-grip, .lightline-panel-button, .lightline-deck-pill, .lightline-layout-option, .lightline-grip-item):focus-visible {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+
+    /* The grip's menu: in the top layer, beside its grip. */
+    .lightline-grip-menu {
+      position: fixed;
+      inset: auto;
+      margin: 0;
+      min-inline-size: 11rem;
+      padding: 6px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .lightline-grip-menu:popover-open {
+      display: grid;
+    }
+
+    .lightline-grip-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: start;
+      cursor: pointer;
+    }
+
+    .lightline-grip-item::before {
+      content: "";
+      inline-size: 6px;
+      block-size: 6px;
+      border-radius: 50%;
+    }
+
+    .lightline-grip-item[aria-disabled="true"] {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .lightline-grip-item-split {
+      margin-block-start: 4px;
+      border-block-start: 1px solid transparent;
+    }
+
+    /* The drag's ghost and the mark on the frame's edge where the panel will go: placed in the room's own
+       coordinates, so not in any grid area. */
+    :scope[data-layout="suite"] > :is(.lightline-suite-ghost, .lightline-suite-mark) {
+      grid-row: auto;
+      grid-column: auto;
+    }
+
+    .lightline-suite-ghost,
+    .lightline-suite-mark {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    .lightline-suite-ghost {
+      box-sizing: border-box;
+      display: grid;
+      place-items: center;
+      border: 1px dashed;
+      border-radius: 12px;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .lightline-suite-mark {
+      border-radius: 2px;
+    }
+
+    /* ---------- The layout switch ---------- */
+
+    .lightline-layout-switch {
+      display: flex;
+      padding: 2px;
+      border-radius: 999px;
+      pointer-events: auto;
+    }
+
+    .lightline-layout-option {
+      padding: 4px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: none;
+      color: inherit;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* ---------- The Audio Lab panel: its controls, and its meters standing tall beside them ---------- */
+
+    .lightline-suite-lab {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 12px;
+      row-gap: 12px;
+    }
+
+    .lightline-suite-lab > :not(.lightline-lab-meter) {
+      grid-column: 1;
+    }
+
+    .lightline-suite-lab > .lightline-lab-meter-tall {
+      grid-column: 2;
+      grid-row: 1 / span 6;
+      align-content: start;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-bars {
+      grid-auto-flow: column;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-bar {
+      flex-direction: column-reverse;
+      gap: 4px;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-track {
+      flex: none;
+      inline-size: 10px;
+      block-size: 14rem;
+      border-radius: 3px;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-level {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-peak {
+      inset-inline: 0;
+      inset-block: auto 0;
+      inline-size: auto;
+      block-size: 2px;
+      margin: 0 0 -2px;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-clip {
+      position: static;
+      justify-self: center;
+    }
+
+    .lightline-lab-meter-tall .lightline-lab-readout {
+      max-inline-size: 5rem;
+      font-size: 11px;
+    }
+
+    /* ---------- The timecode deck ---------- */
+
+    .lightline-deck {
+      display: grid;
+      gap: 10px;
+    }
+
+    .lightline-deck-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lightline-deck-readout {
+      font-family: var(--lightline-font-record);
+      font-size: 22px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    .lightline-deck-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .lightline-deck-pill {
+      padding: 4px 10px;
+      border: 1px solid;
+      border-radius: 999px;
+      background: none;
+      color: inherit;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ---------- Stream telemetry ---------- */
+
+    .lightline-telemetry {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+    }
+
+    .lightline-telemetry-row {
+      display: grid;
+      grid-template-columns: 8.5rem minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .lightline-telemetry dt {
+      font-size: 12px;
+    }
+
+    .lightline-telemetry dd {
+      margin: 0;
+      font-family: var(--lightline-font-record);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    /* ---------- The guides in the bar ---------- */
+
+    /* The bar's middle, between the time and the icons (bar-guides.tsx): the five guides at their own size, centered in
+       what the bar leaves, or, where they do not fit, the Guides button at its end. Folded, the five are laid out apart,
+       unseen and inert, at their own width, so the skin measures them the same either way. */
+    .lightline-bar-guides {
+      position: relative;
+      display: flex;
+      flex: 1 1 0;
+      align-items: center;
+      justify-content: center;
+      min-inline-size: 0;
+      pointer-events: auto;
+    }
+
+    .lightline-bar-guides[data-folded] {
+      justify-content: flex-end;
+    }
+
+    .lightline-bar-guides-list {
+      display: flex;
+      flex: none;
+      gap: 6px;
+      box-sizing: border-box;
+      inline-size: max-content;
+      padding-inline: 12px;
+    }
+
+    .lightline-bar-guides[data-folded] > .lightline-bar-guides-list {
+      position: absolute;
+      inset-inline-start: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .lightline-bar-guide {
+      flex: none;
+      white-space: nowrap;
+    }
+
+    .lightline-bar-guides-button {
+      min-block-size: 28px;
+      padding-inline: 12px;
+      border: 1px solid;
+      border-radius: 999px;
+      background: none;
+      color: inherit;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    /* ---------- The timeline ---------- */
+
+    /* The panel's body is the timeline alone: the ruler, the chapters where they start, the film strip, the waveform.
+       It takes the height its line or its rail gives it (beside the film, the Timecode panel's; under it, a third of
+       the screen), the strip and the waveform sharing it 1 to 1.2, so both are taller than the 44 and 80 px they were
+       wherever the line is as tall as before. It needs no more than 148 px, so in the held rail it scrolls nothing. */
+    .lightline-panel-guides .lightline-panel-body {
+      display: grid;
+    }
+
+    .lightline-timeline {
+      position: relative;
+      display: grid;
+      grid-template-rows: [ruler] 20px [chapters] 20px [strip] minmax(56px, 1fr) [wave] minmax(52px, 1.2fr);
+      align-self: stretch;
+      min-block-size: calc(40px + 56px + 52px);
+      max-block-size: 280px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    /* Floating, its panel has no line to take a height from. */
+    .lightline-panel[data-floating] .lightline-timeline {
+      block-size: 13.5rem;
+    }
+
+    /* The ruler: a label at each step that fits the film's length (5 s for a short film, 30 s for the music video at
+       1920), in the record face, and short ticks between. */
+    .lightline-timeline-ruler,
+    .lightline-timeline-chapters {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lightline-timeline-ruler {
+      box-sizing: border-box;
+      border-block-end: 1px solid transparent;
+    }
+
+    .lightline-timeline-tick {
+      position: absolute;
+      inset-block-end: 0;
+      block-size: 5px;
+      border-inline-start: 1px solid;
+    }
+
+    .lightline-timeline-tick[data-major] {
+      box-sizing: border-box;
+      block-size: 100%;
+      padding-inline-start: 4px;
+      font-family: var(--lightline-font-record);
+      font-size: 10px;
+      line-height: 14px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* A ruler label the playhead's timecode covers, or a chapter's name the current chapter's runs over (panels.tsx), is
+       hidden while it is; its tick or hairline stays. */
+    :is(.lightline-timeline-tick-label, .lightline-timeline-chapter-name)[data-covered] {
+      visibility: hidden;
+    }
+
+    /* A chapter: a hairline where it starts and its name beside it, in the label face, cut where the next begins (the
+       Timecode panel lists them whole). Above the strip, never over its tiles. */
+    .lightline-timeline-chapter {
+      position: absolute;
+      inset-block: 0;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      padding-inline: 5px 6px;
+      border-inline-start: 1px solid;
+      overflow: hidden;
+    }
+
+    .lightline-timeline-chapter-name {
+      overflow: hidden;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      font-weight: 500;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* The chapter the film is in reads whole, over the next ones where it is longer than its stretch. */
+    .lightline-timeline-chapter[data-current] {
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .lightline-timeline-chapter[data-current] > .lightline-timeline-chapter-name {
+      overflow: visible;
+      padding-inline-end: 6px;
+    }
+
+    .lightline-timeline-strip {
+      display: flex;
+      min-block-size: 0;
+      overflow: hidden;
+    }
+
+    .lightline-timeline-tile {
+      flex: none;
+      block-size: 100%;
+      background-repeat: no-repeat;
+    }
+
+    .lightline-timeline-wave {
+      position: relative;
+      min-block-size: 0;
+    }
+
+    .lightline-timeline-wave svg {
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      display: block;
+      block-size: 100%;
+    }
+
+    /* The played part of the waveform: the same outline in the beam's light, cut at the playhead. */
+    .lightline-timeline-played {
+      position: absolute;
+      inset: 0;
+      clip-path: inset(0 calc((1 - var(--lightline-at, 0)) * 100%) 0 0);
+    }
+
+    .lightline-timeline-note {
+      position: absolute;
+      inset-block-start: 4px;
+      inset-inline-start: 8px;
+      font-size: 11px;
+    }
+
+    /* The playhead: one thin line of light down the timeline, placed by the share the skin writes each frame while the
+       film plays (a jump, with no transition, under reduced motion), and the film's timecode on the ruler beside it,
+       sliding from the line's right to its left along the way so it never leaves the timeline. */
+    .lightline-timeline-head {
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: calc(var(--lightline-at, 0) * 100%);
+      inline-size: 2px;
+      margin-inline-start: -1px;
+      pointer-events: none;
+    }
+
+    .lightline-timeline-time {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: calc(var(--lightline-at, 0) * 100%);
+      translate: calc(var(--lightline-at, 0) * -100%) 0;
+      box-sizing: border-box;
+      block-size: 19px;
+      padding-inline: 5px;
+      border-radius: 3px;
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 19px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* The timeline is one native slider laid over the strip and the waveform: it seeks a second a key. */
+    .lightline-timeline-input {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .lightline-timeline:has(.lightline-timeline-input:focus-visible) {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+
+    /* The guides: thin lines over the picture, a darker line under each so it reads on any frame. */
+    :scope[data-layout="suite"] > .lightline-guides {
+      position: absolute;
+      z-index: 25;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .lightline-guides line {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .lightline-guides-under {
+      stroke-width: 3;
+    }
+
+    .lightline-guides-line {
+      stroke-width: 1;
+    }
+
+    /* ---------- Colors ---------- */
+
+    @media (forced-colors: none) {
+      :scope[data-layout="suite"] {
+        background: var(--lightline-ground);
+      }
+
+      .lightline-panel {
+        color: var(--lightline-text);
+        background: var(--lightline-pane);
+        border: 1px solid var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+      }
+
+      /* Docked, a panel is glass over the room; floating over the picture it keeps the pane, which the picture's
+         brightest scene cannot reach through. */
+      .lightline-panel:not([data-floating]) {
+        /* The glass's muted words are the lit ones, as in his picture, where the panels' words are all near white. */
+        --lightline-muted: var(--lightline-muted-lit);
+        background: var(--lightline-glass);
+        backdrop-filter: var(--lightline-glass-blur);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+      }
+
+      .lightline-panel-title,
+      .lightline-panel-note,
+      .lightline-telemetry dt,
+      .lightline-timeline-note {
+        color: var(--lightline-muted);
+      }
+
+      .lightline-panel-grip {
+        color: var(--lightline-muted);
+      }
+
+      .lightline-panel-grip:hover {
+        color: var(--lightline-text);
+        background: rgb(255 255 255 / 0.08);
+      }
+
+      .lightline-panel-body,
+      :scope[data-layout="suite"] > .lightline-rail {
+        scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+      }
+
+      :is(.lightline-panel-grip, .lightline-panel-button, .lightline-deck-pill, .lightline-layout-option, .lightline-grip-item):focus-visible,
+      .lightline-panel-body:focus-visible,
+      .lightline-timeline:has(.lightline-timeline-input:focus-visible) {
+        outline-color: var(--lightline-cyan);
+      }
+
+      .lightline-panel-button,
+      .lightline-deck-pill {
+        border-color: rgb(255 255 255 / 0.18);
+      }
+
+      .lightline-panel-button:not(:disabled):hover,
+      .lightline-deck-pill:hover {
+        border-color: rgb(255 255 255 / 0.4);
+      }
+
+      .lightline-deck-pill[aria-current="true"] {
+        border-color: var(--lightline-cyan);
+        color: var(--lightline-cyan);
+      }
+
+      .lightline-telemetry dd[data-tone="running"] {
+        color: var(--lightline-blue);
+      }
+
+      .lightline-telemetry dd[data-tone="missed"] {
+        color: var(--lightline-magenta);
+      }
+
+      .lightline-grip-menu {
+        color: var(--lightline-text);
+        background: var(--lightline-pane-to);
+        border: 1px solid var(--lightline-pane-edge);
+        box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+      }
+
+      .lightline-grip-item:hover,
+      .lightline-grip-item:focus-visible {
+        background: rgb(255 255 255 / 0.08);
+      }
+
+      .lightline-grip-item[aria-checked="true"]::before {
+        background: var(--lightline-cyan);
+      }
+
+      .lightline-grip-item-split {
+        border-block-start-color: var(--lightline-pane-edge);
+      }
+
+      .lightline-suite-ghost {
+        color: var(--lightline-text);
+        border-color: var(--lightline-cyan);
+        background: rgb(6 10 14 / 0.7);
+      }
+
+      .lightline-suite-mark {
+        background: var(--lightline-cyan);
+      }
+
+      .lightline-suite-mark[data-float] {
+        background: var(--lightline-muted);
+      }
+
+      .lightline-layout-switch {
+        background: rgb(6 10 14 / 0.55);
+        box-shadow: inset 0 0 0 1px var(--lightline-pane-edge);
+      }
+
+      .lightline-layout-option {
+        color: var(--lightline-muted);
+      }
+
+      .lightline-layout-option[aria-pressed="true"] {
+        color: var(--lightline-ground);
+        background: var(--lightline-text);
+      }
+
+      .lightline-timeline {
+        background: rgb(255 255 255 / 0.04);
+      }
+
+      .lightline-timeline-ruler {
+        color: var(--lightline-muted);
+        border-block-end-color: rgb(255 255 255 / 0.12);
+      }
+
+      .lightline-timeline-tick {
+        border-color: rgb(255 255 255 / 0.28);
+      }
+
+      .lightline-timeline-tick[data-major] {
+        border-color: rgb(255 255 255 / 0.5);
+      }
+
+      .lightline-timeline-chapter {
+        color: var(--lightline-muted);
+        border-color: rgb(255 255 255 / 0.5);
+      }
+
+      .lightline-timeline-chapter[data-current] {
+        color: var(--lightline-cyan);
+        border-color: var(--lightline-cyan);
+      }
+
+      .lightline-timeline-chapter[data-current] > .lightline-timeline-chapter-name {
+        background: var(--lightline-ground);
+      }
+
+      /* As the seek bar: the played part in the beam's light (the next move's cyan, green at the end), the rest muted. */
+      .lightline-timeline-wave-rest path {
+        fill: rgb(255 255 255 / 0.45);
+      }
+
+      .lightline-timeline-wave-played path {
+        fill: var(--lightline-beam, var(--lightline-cyan));
+      }
+
+      /* The playhead in the state's light, as the seek bar's: cyan in play, amber paused, green at the end. */
+      .lightline-timeline-head {
+        background: var(--lightline-head, var(--lightline-cyan));
+        box-shadow: 0 0 6px color-mix(in oklab, var(--lightline-head, var(--lightline-cyan)) 70%, transparent);
+      }
+
+      .lightline-timeline-time {
+        color: var(--lightline-ground);
+        background: var(--lightline-head, var(--lightline-cyan));
+      }
+
+      .lightline-bar-guides-button {
+        border-color: rgb(255 255 255 / 0.18);
+        color: var(--lightline-muted-lit);
+      }
+
+      .lightline-bar-guides-button:hover {
+        border-color: rgb(255 255 255 / 0.4);
+      }
+
+      .lightline-bar-guides-button[data-on] {
+        border-color: var(--lightline-cyan);
+        color: var(--lightline-text);
+      }
+
+      .lightline-bar-guides-button:focus-visible {
+        outline: 2px solid var(--lightline-cyan);
+        outline-offset: 2px;
+      }
+
+      .lightline-guides-under {
+        stroke: rgb(6 10 14 / 0.55);
+      }
+
+      .lightline-guides-line {
+        stroke: rgb(255 255 255 / 0.85);
+      }
+    }
+
+    @media (forced-colors: active) {
+      .lightline-panel,
+      .lightline-grip-menu {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      .lightline-panel-button,
+      .lightline-deck-pill {
+        border-color: ButtonText;
+        color: ButtonText;
+      }
+
+      .lightline-deck-pill[aria-current="true"],
+      .lightline-grip-item[aria-checked="true"],
+      .lightline-layout-option[aria-pressed="true"] {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+      }
+
+      .lightline-grip-item[aria-checked="true"]::before {
+        background: Highlight;
+      }
+
+      .lightline-layout-switch {
+        border: 1px solid ButtonText;
+      }
+
+      .lightline-suite-ghost {
+        border-color: Highlight;
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      .lightline-suite-mark,
+      .lightline-timeline-head {
+        background: Highlight;
+      }
+
+      /* The pair kept as written, or the forced text color lands on the Highlight box. */
+      .lightline-timeline-time {
+        forced-color-adjust: none;
+        background: Highlight;
+        color: HighlightText;
+      }
+
+      .lightline-timeline-ruler {
+        color: CanvasText;
+        border-block-end-color: CanvasText;
+      }
+
+      .lightline-timeline-tick,
+      .lightline-timeline-chapter {
+        color: CanvasText;
+        border-color: CanvasText;
+      }
+
+      .lightline-timeline-chapter[data-current] {
+        color: Highlight;
+        border-color: Highlight;
+      }
+
+      .lightline-timeline-chapter[data-current] > .lightline-timeline-chapter-name {
+        background: Canvas;
+      }
+
+      /* Each tile edged in the text color, so the strip reads as frames whatever the pictures do. */
+      .lightline-timeline-tile {
+        outline: 1px solid CanvasText;
+        outline-offset: -1px;
+      }
+
+      .lightline-timeline-wave-rest path {
+        fill: CanvasText;
+      }
+
+      .lightline-timeline-wave-played path {
+        fill: Highlight;
+      }
+
+      .lightline-bar-guides-button {
+        border-color: ButtonText;
+        color: ButtonText;
+      }
+
+      .lightline-bar-guides-button[data-on] {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+      }
+
+      .lightline-bar-guides-button:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+      }
+
+      .lightline-guides-under {
+        stroke: Canvas;
+      }
+
+      .lightline-guides-line {
+        stroke: CanvasText;
+      }
+    }
+  }
+
+  /* The change between Cinema and the Suite: one short movement of the frame (a still under reduced motion,
+     where the skin does not start the transition at all). */
+  ::view-transition-group(*.lightline-frame) {
+    animation-duration: 240ms;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
+/* Part 5, right to left: the room mirrors, but what maps a physical quantity keeps its axis. Time runs left to right
+   as in the library's own bar, frequency low to high (the curve places its nodes by `left` already), and the balance
+   and the meters keep left on the left. */
+@layer lightline {
+  .media-skin.lightline :is(.lightline-timeline, .lightline-lab-bars, .lightline-lab-line:has(.lightline-lab-balance)) {
+    direction: ltr;
+  }
+}

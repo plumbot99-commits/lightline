@@ -1,0 +1,5 @@
+/* Global styles for the skin, loaded only in the preview. Lightline names Inter and Montserrat (the studio's
+   type) with system fallbacks and loads no fonts itself; the preview loads them here so the skin is judged
+   in its own type. A host page hands in its own loaded families through --lightline-font-body and
+   --lightline-font-heading. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&display=swap");

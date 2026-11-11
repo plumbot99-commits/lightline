@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "videojs": {
+      "source": {
+        "source": "github",
+        "repo": "videojs/skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "videojs@videojs": true
+  }
+}

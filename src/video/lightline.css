@@ -1,0 +1,1413 @@
+/*
+ * Lightline: the look over Scaffold's structure. These rules sit in their own layer after Scaffold's
+ * `components` layer, so they win without !important. Every rule that sets a color is fenced to
+ * forced-colors: none, so a forced-colors user keeps Scaffold's system-color rules. Spec: design/spec.md.
+ */
+@layer components, lightline;
+
+@layer lightline {
+  @scope (.media-skin.lightline[data-theme="scaffold"][data-preset="video"]) {
+    /* Lightline is light in the dark: the skin is dark whatever the system or the host page says, so every
+       light-dark() in Scaffold's theme resolves dark (the owner's call, 2026-11-09, after the glow could not be
+       seen on the light scheme). Forced colors still decides its own colors. */
+    :scope {
+      color-scheme: dark;
+      font-family: var(--media-font-family, var(--lightline-font-body-stack));
+    }
+
+    /* ---------- The glass pane ---------- */
+
+    .video-controls-bottom {
+      inset-inline: calc(var(--media-spacing) * 3);
+      bottom: calc(var(--media-spacing) * 3);
+      gap: calc(var(--media-spacing) * 1);
+      padding: calc(var(--media-spacing) * 2.5) calc(var(--media-spacing) * 3) calc(var(--media-spacing) * 2);
+      border-radius: 16px;
+      transition: opacity var(--media-duration-controls) ease-out;
+    }
+
+    @media (forced-colors: none) {
+      .video-controls-bottom {
+        background: var(--lightline-pane);
+        border: 1px solid var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+      }
+    }
+
+    @container media-root (width < 30rem) {
+      .video-controls-bottom {
+        inset-inline: calc(var(--media-spacing) * 2);
+        bottom: calc(var(--media-spacing) * 2);
+        padding: calc(var(--media-spacing) * 1.5) calc(var(--media-spacing) * 2) calc(var(--media-spacing) * 1);
+        border-radius: 12px;
+      }
+    }
+
+    /* ---------- Buttons ---------- */
+
+    .media-button {
+      border-radius: 8px;
+    }
+
+    @media (forced-colors: none) {
+      .media-button:focus-visible {
+        outline-color: var(--lightline-cyan);
+      }
+    }
+
+    /* Buttons that sit straight on the picture get the pane's glass, so a light icon still reads over the
+       film's brightest frames (seen on The Rogue Render at 0:20, the white wall screen). They set the custom
+       property Scaffold's rules read, which also gets past its !important on center buttons. */
+    @media (forced-colors: none) {
+      .video-controls-center-seek,
+      .video-controls-top .media-button {
+        --media-background: rgb(8 16 20 / 0.66);
+        --media-button-highlight: rgb(15 42 48 / 0.9);
+        box-shadow: inset 0 0 0 1px var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+      }
+    }
+
+    /* The main button: cyan only in the center while paused, where it is the next move. */
+    .video-controls-center-play {
+      border-radius: 8px;
+    }
+
+    /* Scaffold paints center buttons with !important in its own layer, which a later layer cannot beat with
+       !important; so the main button sets the custom properties those rules read. */
+    @media (forced-colors: none) {
+      .video-controls-center-play[data-paused] {
+        --media-background: var(--media-accent);
+        --media-button-highlight: var(--media-accent);
+        color: var(--media-accent-foreground);
+        box-shadow: var(--lightline-glow-cyan);
+      }
+
+      @media (hover: hover) {
+        .video-controls-center-play[data-paused]:hover {
+          filter: brightness(1.08);
+        }
+      }
+    }
+
+    /* ---------- The rail: a hairline with a cut at each scene change ---------- */
+
+    .media-time-slider-chapter {
+      --media-chapter-inset-start: 0.15;
+      --media-chapter-inset-end: 0.15;
+    }
+
+    .media-time-slider-chapter:first-of-type {
+      --media-chapter-inset-start: 0;
+    }
+
+    .media-time-slider-chapter:last-of-type {
+      --media-chapter-inset-end: 0;
+    }
+
+    .media-time-slider-track {
+      height: 2px;
+      transition: height var(--media-duration-slider) ease-out;
+    }
+
+    @scope (.media-time-slider) {
+      &:is(:hover, [data-dragging], [data-pointing], :focus-within) .media-time-slider-track {
+        height: 4px;
+      }
+    }
+
+    @media (forced-colors: none) {
+      .media-time-slider-track:before {
+        background-color: rgb(255 255 255 / 0.24);
+      }
+
+      .media-time-slider-buffer {
+        background-color: rgb(255 255 255 / 0.42);
+      }
+
+      /* The beam: the played part glows. Its clip opens 6 px above and below for the glow, while each scene's
+         own clip still cuts the line at the scene's edges. */
+      .media-time-slider-fill {
+        background-color: var(--lightline-beam);
+        box-shadow: 0 0 6px color-mix(in oklab, var(--lightline-beam) 70%, transparent);
+        clip-path: inset(-6px 0);
+        transition:
+          background-color var(--media-duration-slower) ease-out,
+          box-shadow var(--media-duration-slower) ease-out;
+      }
+    }
+
+    /* The playhead: always lit, the head of the beam. 8 px at rest, 12 px under the pointer or focus. */
+    .media-time-slider-thumb {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition:
+        width var(--media-duration-slider) ease-out,
+        height var(--media-duration-slider) ease-out;
+    }
+
+    @scope (.media-time-slider) {
+      &:is(:hover, [data-dragging], [data-pointing], :focus-within) .media-time-slider-thumb {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    @media (forced-colors: none) {
+      .media-time-slider-thumb {
+        background: radial-gradient(circle, #fff 0 30%, var(--lightline-head) 72%);
+        border: 0;
+        box-shadow:
+          0 0 6px 1px color-mix(in oklab, var(--lightline-head) 85%, transparent),
+          0 0 18px 4px color-mix(in oklab, var(--lightline-head) 35%, transparent);
+        transition:
+          width var(--media-duration-slider) ease-out,
+          height var(--media-duration-slider) ease-out,
+          box-shadow var(--media-duration-slower) ease-out;
+      }
+
+      .media-time-slider-thumb:focus-visible {
+        outline-color: var(--lightline-cyan);
+      }
+    }
+
+    /* The preview above the rail: the pointer time as a record, then the scene's name. */
+    .media-time-slider-preview-meta {
+      border-radius: 8px;
+    }
+
+    @media (forced-colors: none) {
+      .media-time-slider-preview-meta {
+        background: var(--lightline-pane);
+        border: 1px solid var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+        color: var(--lightline-text);
+      }
+    }
+
+    .media-time-slider-value {
+      font-family: var(--lightline-font-record);
+    }
+
+    .media-time-slider-chapter-title {
+      opacity: 1;
+      color: var(--lightline-muted-lit);
+    }
+
+    /* The film strip: real frames from the Mux storyboard, framed in a hairline of light. */
+    .media-slider-thumbnail {
+      border-radius: 8px;
+    }
+
+    @media (forced-colors: none) {
+      .media-slider-thumbnail {
+        background-color: var(--lightline-ground);
+        box-shadow:
+          inset 0 0 0 1px rgb(255 255 255 / 0.22),
+          0 0 0 1px rgb(6 10 14 / 0.6),
+          0 0 16px rgb(110 232 233 / 0.18),
+          0 10px 30px rgb(0 0 0 / 0.45);
+      }
+
+      .media-slider-thumbnail-image {
+        border-radius: inherit;
+      }
+    }
+
+    @media (forced-colors: active) {
+      .media-slider-thumbnail {
+        outline: 1px solid CanvasText;
+      }
+    }
+
+    /* The seek buttons' "10" is a number in a record, like the time. */
+    .media-seek-button-label {
+      font-family: var(--lightline-font-record);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- Time, set as a record ---------- */
+
+    .media-time-group {
+      font-family: var(--lightline-font-record);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    @media (forced-colors: none) {
+      .media-time-duration-value,
+      .media-time-separator {
+        color: var(--lightline-muted);
+      }
+    }
+
+    /* ---------- Menus and tooltips: the same glass ---------- */
+
+    /* The settings menu's surface is .media-menu-popup (seen in the slice 4 capture: Scaffold's square box
+       until this rule). Rows get 8 px corners inside a 4 px inset. */
+    .media-menu-popup {
+      border-radius: 16px;
+      padding: 4px;
+    }
+
+    /* Room for the settings menu's eight rows: up to 22rem, bounded by the space the positioning finds. The
+       popup sits in the top layer, where a container query does not reach it, so the bound is the only cap. */
+    .media-menu-popup {
+      max-height: min(var(--media-menu-available-height, 22rem), 22rem);
+    }
+
+    .media-menu-item,
+    .media-menu-back-item,
+    .media-menu-radio-item {
+      border-radius: 8px;
+    }
+
+    @media (forced-colors: none) {
+      .media-menu-popup,
+      .media-tooltip-popup {
+        background: var(--lightline-pane);
+        border: 1px solid var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+      }
+
+      .media-menu-item:focus-visible,
+      .media-menu-back-item:focus-visible,
+      .media-menu-radio-item:focus-visible,
+      .media-volume-slider-thumb:focus-visible {
+        outline-color: var(--lightline-cyan);
+      }
+    }
+
+    .media-tooltip-popup {
+      border-radius: 8px;
+    }
+
+    /* ---------- The error dialog: a miss the record keeps ---------- */
+
+    .media-dialog-popup {
+      border-radius: 16px;
+    }
+
+    .media-dialog-title {
+      font-family: var(--lightline-font-label);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* The Work page's MISSED mark: a ring with a gap at the upper right, in the marks' line weight. */
+    .media-dialog-title::before {
+      content: "";
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M15.06 5.5A7 7 0 1 1 10.22 2.11' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M15.06 5.5A7 7 0 1 1 10.22 2.11' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+      background-color: currentColor;
+    }
+
+    .media-dialog-close {
+      border-radius: 8px;
+    }
+
+    @media (forced-colors: none) {
+      .media-dialog-popup {
+        background: var(--lightline-pane);
+        border: 1px solid color-mix(in oklab, var(--lightline-magenta) 40%, transparent);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow:
+          0 0 24px rgb(255 90 217 / 0.16),
+          0 10px 30px rgb(0 0 0 / 0.4);
+      }
+
+      .media-dialog-title::before {
+        background-color: var(--lightline-magenta);
+      }
+
+      .media-dialog-description {
+        color: var(--lightline-muted-lit);
+      }
+
+      /* Dismissing is the next move: the cyan main button. */
+      .media-dialog-close {
+        background-color: var(--media-accent);
+        color: var(--media-accent-foreground);
+        box-shadow: var(--lightline-glow-cyan);
+      }
+    }
+
+    /* ---------- Lightline: light moving through the dark ---------- */
+
+    /* Which light each part carries: the beam and the playhead are cyan (the next move) while the film
+       plays; the playhead turns orange on pause (waiting), and beam and playhead turn green at the end
+       (done). The frame's glow is the film's own light while it plays (sampled by the light layer) and the
+       state's color otherwise. --media-accent-color still sets the beam. */
+    @media (forced-colors: none) {
+      :scope {
+        --lightline-beam: var(--media-accent);
+        --lightline-head: var(--media-accent);
+        --lightline-glow: transparent;
+        --lightline-glow-near: 40%;
+        --lightline-glow-far: 18%;
+        --lightline-house: 0 0 0 0 transparent;
+        --lightline-spill: 1;
+        box-shadow:
+          0 0 40px 2px
+            color-mix(in oklab, var(--lightline-glow) calc(var(--lightline-glow-near) * var(--lightline-spill)), transparent),
+          0 16px 120px 24px
+            color-mix(in oklab, var(--lightline-glow) calc(var(--lightline-glow-far) * var(--lightline-spill)), transparent),
+          var(--lightline-house);
+        transition: box-shadow var(--lightline-duration-ambient) ease-out;
+      }
+
+      :scope:has(> .lightline-light[data-state="playing"]) {
+        --lightline-glow: var(--lightline-ambient, var(--lightline-muted-lit));
+        --lightline-glow-near: calc(12% + 36% * var(--lightline-ambient-level, 0.4));
+        --lightline-glow-far: calc(4% + 18% * var(--lightline-ambient-level, 0.4));
+      }
+
+      :scope:has(> .lightline-light[data-state="paused"]) {
+        --lightline-head: var(--lightline-orange);
+        --lightline-glow: var(--lightline-orange);
+        --lightline-glow-near: 26%;
+        --lightline-glow-far: 10%;
+      }
+
+      :scope:has(> .lightline-light[data-state="ended"]) {
+        --lightline-beam: var(--lightline-green);
+        --lightline-head: var(--lightline-green);
+        --lightline-glow: var(--lightline-green);
+        --lightline-glow-near: 26%;
+        --lightline-glow-far: 10%;
+      }
+
+      :scope:has(> .lightline-light[data-state="error"]) {
+        --lightline-glow: var(--lightline-magenta);
+        --lightline-glow-near: 30%;
+        --lightline-glow-far: 12%;
+      }
+
+      /* The viewer's ambient light setting scales everything that spills past the frame, the film's light
+         and the state's alike; off leaves only the light inside the frame. The strongest step stays under
+         80% of the color, so the spill never reads as a solid edge. */
+      :scope[data-ambient="off"] {
+        --lightline-spill: 0;
+      }
+
+      :scope[data-ambient="low"] {
+        --lightline-spill: 0.5;
+      }
+
+      :scope[data-ambient="high"] {
+        --lightline-spill: 1.6;
+      }
+    }
+
+    /* Under reduced motion the film's light is a still: one fixed glow, not the sampled picture. */
+    @media (forced-colors: none) and (prefers-reduced-motion: reduce) {
+      :scope:has(> .lightline-light[data-state="playing"]) {
+        --lightline-glow: var(--lightline-muted-lit);
+        --lightline-glow-near: 22%;
+        --lightline-glow-far: 8%;
+      }
+    }
+
+    /* The light layer over the picture: pause dims it and rims it orange, the end rims it green, an error
+       flickers it magenta once and holds. */
+    .lightline-light {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity var(--media-duration-slower) ease-out;
+    }
+
+    @media (forced-colors: none) {
+      .lightline-light[data-state="paused"] {
+        opacity: 1;
+        background-color: rgb(6 10 14 / 0.24);
+        box-shadow:
+          inset 0 0 0 1px rgb(253 184 119 / 0.32),
+          inset 0 0 72px rgb(253 184 119 / 0.2);
+      }
+
+      .lightline-light[data-state="ended"] {
+        opacity: 1;
+        background-color: rgb(6 10 14 / 0.24);
+        box-shadow:
+          inset 0 0 0 1px rgb(122 226 167 / 0.32),
+          inset 0 0 72px rgb(122 226 167 / 0.16);
+      }
+
+      .lightline-light[data-state="error"] {
+        opacity: 1;
+        box-shadow:
+          inset 0 0 0 1px rgb(255 90 217 / 0.45),
+          inset 0 0 80px rgb(255 90 217 / 0.22);
+        animation: lightline-flicker var(--lightline-duration-flare) linear 1 both;
+      }
+    }
+
+    @media (forced-colors: active) {
+      .lightline-light {
+        display: none;
+      }
+    }
+
+    @keyframes lightline-flicker {
+      0% { opacity: 0; }
+      8% { opacity: 1; }
+      16% { opacity: 0.1; }
+      30% { opacity: 1; }
+      42% { opacity: 0.35; }
+      100% { opacity: 1; }
+    }
+
+    .lightline-beam-trail,
+    .lightline-beam-sweep,
+    .lightline-cut-flare {
+      position: absolute;
+      top: 50%;
+      pointer-events: none;
+    }
+
+    /* The trail: a short streak of hotter light fading back from the playhead, only while the film plays. */
+    .lightline-beam-trail {
+      right: calc(100% - var(--media-slider-fill, 0%));
+      width: min(64px, var(--media-slider-fill, 0%));
+      height: 4px;
+      translate: 0 -50%;
+      border-radius: 999px;
+      background: linear-gradient(to right, transparent, rgb(214 248 255 / 0.95));
+      filter: drop-shadow(0 0 4px var(--lightline-beam));
+      opacity: 0;
+      transition: opacity var(--media-duration-slower) ease-out;
+    }
+
+    :scope:has(> .lightline-light[data-state="playing"]) .lightline-beam-trail {
+      opacity: 1;
+    }
+
+    @scope (.media-time-slider) {
+      &[data-dragging] .lightline-beam-trail {
+        opacity: 0;
+      }
+    }
+
+    /* The end: green light sweeps the beam once, start to end. */
+    .lightline-beam-sweep {
+      inset-inline: 0;
+      height: 6px;
+      translate: 0 -50%;
+      background: linear-gradient(90deg, transparent, rgb(122 226 167 / 0.95), transparent) no-repeat;
+      background-size: 30% 100%;
+      background-position: -45% 0;
+      filter: drop-shadow(0 0 6px var(--lightline-green));
+      opacity: 0;
+    }
+
+    :scope:has(> .lightline-light[data-state="ended"]) .lightline-beam-sweep {
+      animation: lightline-sweep var(--lightline-duration-sweep) ease-in-out 1 both;
+    }
+
+    @keyframes lightline-sweep {
+      0% { background-position: -45% 0; opacity: 1; }
+      85% { opacity: 1; }
+      100% { background-position: 145% 0; opacity: 0; }
+    }
+
+    /* A scene cut flares once as the playhead passes it in play. */
+    .lightline-cut-flare {
+      width: 2px;
+      height: 14px;
+      margin-inline-start: -1px;
+      translate: 0 -50%;
+      border-radius: 999px;
+      background: linear-gradient(to bottom, transparent, #fff 40% 60%, transparent);
+      filter: drop-shadow(0 0 5px var(--lightline-cyan));
+      opacity: 0;
+      animation: lightline-flare var(--lightline-duration-flare) ease-out 1 both;
+    }
+
+    @keyframes lightline-flare {
+      0% { opacity: 0; scale: 1 0.4; }
+      15% { opacity: 1; scale: 1.5 1.4; }
+      100% { opacity: 0; scale: 1 1; }
+    }
+
+    /* Under reduced motion each becomes a still (no trail, no sweep, no flare); forced colors draws none. */
+    @media (forced-colors: active), (prefers-reduced-motion: reduce) {
+      .lightline-beam-trail,
+      .lightline-beam-sweep,
+      .lightline-cut-flare {
+        display: none;
+      }
+    }
+
+    /* ---------- Controls as thin lines of light ---------- */
+
+    /* The drawn icons are 1.4 px outlines; a faint halo makes each a line of light, brighter under the
+       pointer. The pane's top edge is a hairline of light that fades at both ends. */
+    @media (forced-colors: none) {
+      .media-button-icon {
+        filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.4));
+        transition: filter var(--media-duration-fast) ease-out;
+      }
+
+      @media (hover: hover) {
+        .media-button:hover .media-button-icon {
+          filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.75));
+        }
+      }
+
+      .video-controls-center-play[data-paused] .media-button-icon {
+        filter: none;
+      }
+
+      .video-controls-bottom::before {
+        content: "";
+        position: absolute;
+        inset-inline: 16px;
+        top: -1px;
+        height: 1px;
+        pointer-events: none;
+        background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+      }
+
+      .media-volume-slider-fill {
+        box-shadow: 0 0 5px color-mix(in oklab, var(--media-accent) 60%, transparent);
+      }
+    }
+
+    /* ---------- Settings additions ---------- */
+
+    /* Rows that pair a name with a record: a scene and its time, a shortcut and its keys. */
+    .lightline-menu-row {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--media-spacing) * 3);
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Names stay whole: the panel measures its width from them. */
+    .lightline-menu-row-label {
+      white-space: nowrap;
+    }
+
+    .lightline-menu-time {
+      margin-inline-start: auto;
+      font-family: var(--lightline-font-record);
+      font-variant-numeric: tabular-nums;
+      opacity: 0.75;
+    }
+
+    .lightline-menu-keys {
+      display: inline-flex;
+      flex-shrink: 0;
+      gap: 4px;
+      margin-inline-start: auto;
+    }
+
+    .lightline-menu-keys kbd {
+      min-width: 22px;
+      padding: 2px 6px;
+      border: 1px solid rgb(255 255 255 / 0.28);
+      border-radius: 6px;
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      line-height: 16px;
+      text-align: center;
+    }
+
+    .lightline-menu-group-label {
+      padding: 4px calc(var(--media-spacing) * 2) 2px;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    @media (forced-colors: none) {
+      .lightline-menu-group-label {
+        color: var(--lightline-muted-lit);
+      }
+    }
+
+    /* A checkbox row shows its check when on, as a radio row does. */
+    @scope (.lightline-menu-check) {
+      &[aria-checked="true"] .media-menu-indicator {
+        opacity: 1;
+      }
+    }
+
+    /* Captions style: the browser draws the cues; their size and background follow the viewer's choice. */
+    video::cue {
+      font-family: var(--lightline-font-body-stack);
+    }
+
+    :scope[data-captions-size="75"] video::cue {
+      font-size: 75%;
+    }
+
+    :scope[data-captions-size="150"] video::cue {
+      font-size: 150%;
+    }
+
+    :scope[data-captions-size="200"] video::cue {
+      font-size: 200%;
+    }
+
+    @media (forced-colors: none) {
+      :scope[data-captions-background="none"] video::cue {
+        background-color: transparent;
+        text-shadow:
+          0 0 3px #000,
+          0 1px 2px #000;
+      }
+
+      :scope[data-captions-background="translucent"] video::cue {
+        background-color: rgb(6 10 14 / 0.72);
+      }
+
+      :scope[data-captions-background="solid"] video::cue {
+        background-color: var(--lightline-ground);
+      }
+    }
+
+    /* Theater mode: the house lights go down. The page around the player falls to the ground color, under
+       the film's own light, and the player rises above the page so nothing on it paints over the dark. */
+    :scope[data-theater] {
+      z-index: 1000;
+    }
+
+    @media (forced-colors: none) {
+      :scope[data-theater] {
+        --lightline-house: 0 0 0 100vmax rgb(6 10 14 / 0.94);
+      }
+    }
+
+    /* ---------- Key feedback: one short pill of light ---------- */
+
+    /* Space or K, J or L, M, F (and the arrows, C and I, which share the same parts) answer with one pill,
+       centered, under the top row and above the center controls. It holds 600 ms and fades in 120 ms; under
+       reduced motion it is a still that appears and goes. The words come from the library's translated
+       labels; the indicator group is hidden from assistive technology, and the status announcer speaks the
+       same change. Play and the seeks are the next move (cyan), pause is waiting (orange); mute, fullscreen
+       and the rest carry no color meaning, so they stay text-white. */
+    .media-indicator-group {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .media-status-indicator,
+    .media-volume-indicator,
+    .media-seek-indicator,
+    .media-seek-indicator[data-direction] {
+      grid-row: 1;
+      grid-column: 1;
+      align-self: start;
+      justify-self: center;
+      margin: max(44px, 12cqw) 0 0;
+    }
+
+    .media-indicator {
+      flex-direction: row;
+      gap: 8px;
+      padding: 7px 14px 7px 10px;
+      border-radius: 999px;
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      line-height: 1;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition:
+        opacity 120ms ease-out,
+        translate 120ms ease-out;
+    }
+
+    .media-indicator[data-starting-style],
+    .media-indicator[data-ending-style] {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+
+    .media-seek-indicator[data-direction="forward"] {
+      flex-direction: row-reverse;
+      padding: 7px 10px 7px 14px;
+    }
+
+    .media-status-indicator-icon,
+    .media-volume-indicator-icon,
+    .media-seek-indicator-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    @scope (.media-status-indicator) {
+      &[data-status="play"] .media-status-indicator-play-icon,
+      &[data-status="pause"] .media-status-indicator-pause-icon {
+        display: block;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .media-indicator {
+        transition: none;
+      }
+
+      .media-indicator[data-starting-style],
+      .media-indicator[data-ending-style] {
+        translate: none;
+      }
+    }
+
+    @media (forced-colors: none) {
+      .media-indicator {
+        --lightline-key: var(--lightline-text);
+        color: var(--lightline-key);
+        background: var(--lightline-pane);
+        border: 1px solid color-mix(in oklab, var(--lightline-key) 45%, transparent);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 0 14px color-mix(in oklab, var(--lightline-key) 30%, transparent);
+      }
+
+      .media-status-indicator[data-status="play"],
+      .media-seek-indicator {
+        --lightline-key: var(--lightline-cyan);
+      }
+
+      .media-status-indicator[data-status="pause"] {
+        --lightline-key: var(--lightline-orange);
+      }
+    }
+
+    /* ---------- Hold for 2x: the badge ---------- */
+
+    /* While a press on the picture holds the film at 2x, a small badge says so at the top center, in the
+       state pill's type, kept lower case ("2x"). Speed carries no color meaning, so it is text-white. No motion: it is there while
+       held and gone on release. A long press on touch does not raise the browser's image callout. */
+    :scope {
+      -webkit-touch-callout: none;
+    }
+
+    .lightline-hold-badge {
+      position: absolute;
+      z-index: 25;
+      top: calc(var(--media-spacing) * 3);
+      left: 50%;
+      translate: -50% 0;
+      pointer-events: none;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      line-height: 1;
+      letter-spacing: 0.15em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lightline-hold-badge:not([data-held]) {
+      display: none;
+    }
+
+    @media (forced-colors: none) {
+      .lightline-hold-badge {
+        color: var(--lightline-text);
+        background: var(--lightline-pane);
+        border: 1px solid color-mix(in oklab, var(--lightline-text) 45%, transparent);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 0 14px color-mix(in oklab, var(--lightline-text) 30%, transparent);
+      }
+    }
+
+    @media (forced-colors: active) {
+      .lightline-hold-badge {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+      }
+    }
+
+    /* ---------- The state pill ---------- */
+
+    .video-controls-top {
+      align-items: center;
+    }
+
+    .lightline-state-pill {
+      margin-inline-end: auto;
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      line-height: 1;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 10px 6px 22px;
+      border-radius: 999px;
+      position: relative;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition:
+        color var(--media-duration-fast) ease-out,
+        border-color var(--media-duration-fast) ease-out,
+        box-shadow var(--media-duration-fast) ease-out;
+    }
+
+    .lightline-state-pill:not([data-state]) {
+      display: none;
+    }
+
+    .lightline-state-pill::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      transform: translateY(-50%);
+      background-color: currentColor;
+    }
+
+    @media (forced-colors: none) {
+      .lightline-state-pill {
+        --lightline-pill: var(--lightline-text);
+        color: var(--lightline-pill);
+        background: var(--lightline-pane);
+        border: 1px solid color-mix(in oklab, var(--lightline-pill) 45%, transparent);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 0 14px color-mix(in oklab, var(--lightline-pill) 30%, transparent);
+      }
+
+      .lightline-state-pill[data-state="paused"] {
+        --lightline-pill: var(--lightline-orange);
+      }
+
+      .lightline-state-pill[data-state="loading"] {
+        --lightline-pill: var(--lightline-blue);
+      }
+
+      .lightline-state-pill[data-state="ended"] {
+        --lightline-pill: var(--lightline-green);
+      }
+
+      .lightline-state-pill[data-state="error"] {
+        --lightline-pill: var(--lightline-magenta);
+      }
+    }
+
+    @media (forced-colors: active) {
+      .lightline-state-pill {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+      }
+    }
+
+    /* ---------- The Audio Lab (part 3): its button beside the volume and its glass popover ---------- */
+
+    /* The popover sits in the top layer, out of the bar's opacity, but it inherits the bar's pointer-events
+       when the controls rest; it keeps its own. Its width is fixed so it is placed before it draws. */
+    .lightline-lab {
+      position: fixed;
+      inset: auto;
+      margin: 0;
+      inline-size: min(20rem, calc(100vw - 16px));
+      max-block-size: calc(100vh - 16px);
+      overflow: auto;
+      overscroll-behavior: contain;
+      padding: 12px 14px 14px;
+      border-radius: 16px;
+      pointer-events: auto;
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .lightline-lab:popover-open {
+      display: grid;
+      gap: 12px;
+    }
+
+    .lightline-lab-title,
+    .lightline-lab-label {
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .lightline-lab-title {
+      font-size: 12px;
+    }
+
+    .lightline-lab-set {
+      border: 0;
+      margin: 0;
+      padding: 0;
+      min-inline-size: 0;
+    }
+
+    .lightline-lab-set > legend {
+      padding: 0;
+      margin-block-end: 6px;
+    }
+
+    .lightline-lab-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* A chip is a native radio under its label: the arrows move the choice, as in any radio group. */
+    .lightline-lab-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      min-block-size: 28px;
+      padding-inline: 10px;
+      border: 1px solid;
+      border-radius: 999px;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .lightline-lab-chip input {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .lightline-lab-chip:has(input:focus-visible),
+    .lightline-lab-node:focus-visible,
+    .lightline-lab-test:focus-visible,
+    .lightline-lab-balance:focus-visible {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+
+    /* The curve: the five filters' summed response, drawn as light. */
+    .lightline-lab-eq {
+      display: grid;
+      gap: 6px;
+    }
+
+    .lightline-lab-plot {
+      position: relative;
+      block-size: 120px;
+      margin-inline: 10px;
+    }
+
+    .lightline-lab-curve {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      overflow: visible;
+    }
+
+    .lightline-lab-curve * {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .lightline-lab-zero {
+      stroke-width: 1;
+      stroke-dasharray: 2 4;
+    }
+
+    .lightline-lab-band {
+      stroke-width: 1;
+    }
+
+    .lightline-lab-fill {
+      stroke: none;
+    }
+
+    .lightline-lab-line-curve {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Each node is a vertical slider; its target reaches 10 px past the drawn dot. */
+    .lightline-lab-node {
+      position: absolute;
+      inline-size: 14px;
+      block-size: 14px;
+      margin: -7px 0 0 -7px;
+      border: 2px solid;
+      border-radius: 50%;
+      cursor: ns-resize;
+      touch-action: none;
+    }
+
+    .lightline-lab-node::before {
+      content: "";
+      position: absolute;
+      inset: -10px;
+    }
+
+    .lightline-lab-bands {
+      position: relative;
+      block-size: 28px;
+      margin-inline: 10px;
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lightline-lab-bands > span {
+      position: absolute;
+      inset-block-start: 0;
+      translate: -50% 0;
+      display: grid;
+      justify-items: center;
+      line-height: 1.25;
+    }
+
+    .lightline-lab-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+    }
+
+    .lightline-lab-line > .lightline-lab-label {
+      flex-basis: 100%;
+    }
+
+    .lightline-lab-side,
+    .lightline-lab-value,
+    .lightline-lab-readout {
+      font-family: var(--lightline-font-record);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lightline-lab-value {
+      min-inline-size: 5.5rem;
+      text-align: end;
+    }
+
+    /* The balance: a native range drawn as a thin line with a ring for its thumb. */
+    .lightline-lab-balance {
+      flex: 1;
+      min-inline-size: 6rem;
+      block-size: 20px;
+      margin: 0;
+      appearance: none;
+      background: transparent;
+      border-radius: 10px;
+    }
+
+    .lightline-lab-balance::-webkit-slider-runnable-track {
+      block-size: 2px;
+      border-radius: 1px;
+      background: currentColor;
+    }
+
+    .lightline-lab-balance::-moz-range-track {
+      block-size: 2px;
+      border-radius: 1px;
+      background: currentColor;
+    }
+
+    .lightline-lab-balance::-webkit-slider-thumb {
+      appearance: none;
+      inline-size: 12px;
+      block-size: 12px;
+      margin-block-start: -5px;
+      border: 2px solid;
+      border-radius: 50%;
+    }
+
+    .lightline-lab-balance::-moz-range-thumb {
+      inline-size: 8px;
+      block-size: 8px;
+      border: 2px solid;
+      border-radius: 50%;
+    }
+
+    .lightline-lab-test {
+      min-block-size: 28px;
+      padding-inline: 12px;
+      border: 1px solid;
+      border-radius: 8px;
+      background: transparent;
+      color: inherit;
+      font-family: var(--lightline-font-label);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* The meter: levels in the text color, the held peak in cyan, a clip as a word. Nothing else lights it. */
+    .lightline-lab-meter {
+      position: relative;
+      display: grid;
+      gap: 6px;
+    }
+
+    .lightline-lab-bars {
+      display: grid;
+      gap: 6px;
+    }
+
+    .lightline-lab-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lightline-lab-track {
+      position: relative;
+      flex: 1;
+      block-size: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .lightline-lab-level {
+      position: absolute;
+      inset: 0;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .lightline-lab-level:dir(rtl) {
+      transform-origin: right;
+    }
+
+    .lightline-lab-peak {
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      inline-size: 2px;
+      margin-inline-start: -2px;
+      opacity: 0;
+    }
+
+    .lightline-lab-clip {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+      padding-inline: 6px;
+      border: 1px solid;
+      border-radius: 999px;
+      font-family: var(--lightline-font-label);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .lightline-lab-clip[hidden] {
+      display: none;
+    }
+
+    .lightline-lab-readout {
+      margin: 0;
+    }
+
+    /* Under reduced motion the bars hold still and the slow numeric readout is the meter; otherwise the
+       readout is there for a screen reader only. */
+    @media (prefers-reduced-motion: reduce) {
+      .lightline-lab-bars {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .lightline-lab-readout {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+    }
+
+    @media (forced-colors: none) {
+      .lightline-lab {
+        color: var(--lightline-text);
+        background: var(--lightline-pane);
+        border: 1px solid var(--lightline-pane-edge);
+        backdrop-filter: var(--lightline-pane-blur);
+        box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+      }
+
+      .lightline-lab-button[data-changed] .media-button-icon {
+        color: var(--lightline-cyan);
+      }
+
+      .lightline-lab-label {
+        color: var(--lightline-muted-lit);
+      }
+
+      .lightline-lab-chip {
+        border-color: rgb(255 255 255 / 0.18);
+        color: var(--lightline-muted-lit);
+      }
+
+      .lightline-lab-chip:hover {
+        border-color: rgb(255 255 255 / 0.4);
+      }
+
+      .lightline-lab-chip:has(input:checked) {
+        border-color: var(--lightline-cyan);
+        color: var(--lightline-text);
+        box-shadow: 0 0 10px rgb(110 232 233 / 0.3);
+      }
+
+      .lightline-lab-chip:has(input:focus-visible),
+      .lightline-lab-node:focus-visible,
+      .lightline-lab-test:focus-visible,
+      .lightline-lab-balance:focus-visible {
+        outline-color: var(--lightline-cyan);
+      }
+
+      .lightline-lab-zero {
+        stroke: rgb(255 255 255 / 0.25);
+      }
+
+      .lightline-lab-band {
+        stroke: rgb(255 255 255 / 0.07);
+      }
+
+      .lightline-lab-fill {
+        fill: rgb(110 232 233 / 0.1);
+      }
+
+      .lightline-lab-line-curve {
+        stroke: var(--lightline-cyan);
+        filter: drop-shadow(0 0 4px rgb(110 232 233 / 0.7));
+      }
+
+      .lightline-lab-node {
+        background: var(--lightline-ground);
+        border-color: var(--lightline-cyan);
+        box-shadow: 0 0 8px rgb(110 232 233 / 0.5);
+      }
+
+      .lightline-lab-node:hover,
+      .lightline-lab-node:active {
+        background: var(--lightline-cyan);
+      }
+
+      .lightline-lab-band-freq,
+      .lightline-lab-side {
+        color: var(--lightline-muted);
+      }
+
+      .lightline-lab-value,
+      .lightline-lab-readout {
+        color: var(--lightline-muted-lit);
+      }
+
+      .lightline-lab-balance {
+        color: rgb(255 255 255 / 0.3);
+      }
+
+      .lightline-lab-balance::-webkit-slider-thumb {
+        background: var(--lightline-ground);
+        border-color: var(--lightline-cyan);
+      }
+
+      .lightline-lab-balance::-moz-range-thumb {
+        background: var(--lightline-ground);
+        border-color: var(--lightline-cyan);
+      }
+
+      .lightline-lab-test {
+        border-color: rgb(255 255 255 / 0.18);
+      }
+
+      .lightline-lab-test:hover {
+        border-color: rgb(255 255 255 / 0.4);
+      }
+
+      .lightline-lab-track {
+        background: rgb(255 255 255 / 0.1);
+      }
+
+      .lightline-lab-level {
+        background: var(--lightline-text);
+      }
+
+      .lightline-lab-peak {
+        background: var(--lightline-cyan);
+      }
+
+      .lightline-lab-clip {
+        color: var(--lightline-text);
+        border-color: var(--lightline-text);
+      }
+    }
+
+    @media (forced-colors: active) {
+      .lightline-lab {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      /* The browser's text backplate (Canvas) would hide HighlightText on the chosen chip; the pair is kept whole. */
+      .lightline-lab-chip:has(input:checked) {
+        forced-color-adjust: none;
+        background: Highlight;
+        color: HighlightText;
+        border-color: Highlight;
+      }
+
+      .lightline-lab-zero,
+      .lightline-lab-band {
+        stroke: GrayText;
+      }
+
+      .lightline-lab-fill {
+        fill: none;
+      }
+
+      .lightline-lab-line-curve {
+        stroke: CanvasText;
+      }
+
+      .lightline-lab-node {
+        background: Canvas;
+        border-color: ButtonText;
+      }
+
+      .lightline-lab-balance {
+        color: CanvasText;
+      }
+
+      .lightline-lab-balance::-webkit-slider-thumb {
+        background: Canvas;
+        border-color: ButtonText;
+      }
+
+      .lightline-lab-track {
+        border: 1px solid CanvasText;
+      }
+
+      .lightline-lab-level {
+        background: CanvasText;
+      }
+
+      .lightline-lab-peak {
+        background: Highlight;
+      }
+    }
+  }
+}

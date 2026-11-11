@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lightline icons, first six</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root { --ground:#070A14; --text:#F2F0EA; --muted:#A6B0C2; --lit:#C8CFDD; --cyan:#3FE0FF; --green:#2EF2A0; --magenta:#FF5AD9; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--text); font:15px/1.5 Inter, system-ui, sans-serif; padding:40px 32px 64px; }
+  h1 { font:600 13px Montserrat, sans-serif; letter-spacing:.2em; text-transform:uppercase; color:var(--lit); margin:0 0 6px; }
+  p.note { color:var(--muted); margin:0 0 36px; max-width:760px; }
+  h2 { font:600 11px Montserrat, sans-serif; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin:40px 0 14px; }
+  .grid { display:grid; grid-template-columns: 140px repeat(6, minmax(96px, 1fr)); gap:0; max-width:1100px; border-top:1px solid rgb(242 240 234 / .1); }
+  .grid > div { padding:16px 10px; border-bottom:1px solid rgb(242 240 234 / .1); display:flex; align-items:center; justify-content:center; }
+  .grid > .label { justify-content:flex-start; color:var(--muted); font:12px ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .grid > .head { font:12px ui-monospace, "Cascadia Mono", Consolas, monospace; color:var(--lit); }
+  svg.i { color:var(--text); display:block; }
+  .marks { display:flex; gap:28px; align-items:center; flex-wrap:wrap; }
+  .marks figure { margin:0; display:grid; justify-items:center; gap:6px; font:11px ui-monospace, Consolas, monospace; color:var(--muted); }
+  .bar { margin-top:8px; width:min(896px, 100%); aspect-ratio:16/9; border-radius:4px; position:relative; overflow:hidden;
+         background:url("./rogue-render-war-room.webp") center/cover; }
+  .pane { position:absolute; left:12px; right:12px; bottom:12px; border-radius:16px; padding:10px 12px 8px;
+          background:linear-gradient(180deg, rgb(28 37 64 / .74), rgb(10 14 26 / .8)); border:1px solid rgb(242 240 234 / .12);
+          backdrop-filter:blur(12px) saturate(120%); }
+  .rail { height:2px; display:flex; gap:1px; margin:2px 4px 8px; }
+  .rail span { background:rgb(242 240 234 / .24); }
+  .rail span.p { background:var(--cyan); }
+  .row { display:flex; align-items:center; gap:4px; }
+  .btn { width:32px; height:32px; display:grid; place-items:center; border-radius:8px; }
+  .time { font:12px ui-monospace, "Cascadia Mono", Consolas, monospace; margin-left:6px; letter-spacing:.02em; }
+  .time b { font-weight:400; } .time i { font-style:normal; color:var(--muted); }
+  .spacer { flex:1; }
+</style>
+</head>
+<body>
+<h1>Lightline: the first six icons</h1>
+<p class="note">A first look, drawn as SVG on the 18 by 18 grid for tonight. Line work at 1.4 with round caps and joins, the weight of the Work page's marks shown below them. Once the Media OS brief is approved, the set is drawn in Illustrator and all 25 follow this hand.</p>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="play"><path d="M5.6 3.6 14.4 9 5.6 14.4Z"/></g>
+    <g id="pause"><path d="M6.5 4v10M11.5 4v10"/></g>
+    <g id="volume"><path d="M2.75 7h3l4-3.25v10.5l-4-3.25h-3Z"/><path d="M12.4 6.6a3.4 3.4 0 0 1 0 4.8"/><path d="M14.4 4.6a6.2 6.2 0 0 1 0 8.8"/></g>
+    <g id="captions"><rect x="2.25" y="3.75" width="13.5" height="10.5" rx="2"/><path d="M5.25 8.25h4.5M11.25 8.25h1.5M5.25 11h2M9.25 11h3.5"/></g>
+    <g id="fullscreen"><path d="M2.75 6.75v-4h4M11.25 2.75h4v4M15.25 11.25v4h-4M6.75 15.25h-4v-4"/></g>
+    <g id="settings"><path d="M2.75 5.75h6.75M13.25 5.75h2M2.75 12.25h2M8.5 12.25h6.75"/><circle cx="11.4" cy="5.75" r="1.9"/><circle cx="6.6" cy="12.25" r="1.9"/></g>
+  </defs>
+</svg>
+
+<div class="grid" id="grid"></div>
+
+<h2>Beside the Work page's marks, same size</h2>
+<div class="marks">
+  <figure><svg class="i" width="36" height="36" viewBox="0 0 18 18" fill="none" stroke="#2EF2A0" stroke-width="1.4" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="1.4" fill="#2EF2A0" stroke="none"/></svg>ASKED</figure>
+  <figure><svg class="i" width="36" height="36" viewBox="0 0 18 18" fill="none" stroke="#2EF2A0" stroke-width="1.4" stroke-linejoin="round"><path d="M9 2 16 9 9 16 2 9Z"/></svg>CHECKED</figure>
+  <figure><svg class="i" width="36" height="36" viewBox="0 0 18 18" fill="none" stroke="#2EF2A0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><path d="M6.2 9 8.4 11.2 12.2 6.9"/></svg>APPROVED</figure>
+  <figure><svg class="i" width="36" height="36" viewBox="0 0 18 18" fill="none" stroke="#FF5AD9" stroke-width="1.4" stroke-linecap="round"><path d="M15.06 5.5A7 7 0 1 1 10.22 2.11"/></svg>MISSED</figure>
+  <figure><svg class="i" width="36" height="36" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#play"/></svg>play</figure>
+  <figure><svg class="i" width="36" height="36" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#settings"/></svg>settings</figure>
+</div>
+
+<h2>In the bar, at the size the player uses (18 px)</h2>
+<div class="bar">
+  <div class="pane">
+    <div class="rail"><span class="p" style="flex:13"></span><span class="p" style="flex:9"></span><span style="flex:13"></span><span style="flex:4"></span><span style="flex:6.5"></span><span style="flex:10"></span><span style="flex:12"></span></div>
+    <div class="row">
+      <div class="btn"><svg class="i" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#play"/></svg></div>
+      <div class="btn"><svg class="i" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#volume"/></svg></div>
+      <span class="time"><b>0:20</b> <i>/ 0:50</i></span>
+      <span class="spacer"></span>
+      <div class="btn"><svg class="i" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#captions"/></svg></div>
+      <div class="btn"><svg class="i" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#settings"/></svg></div>
+      <div class="btn"><svg class="i" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#fullscreen"/></svg></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const names = ["play", "pause", "volume", "captions", "fullscreen", "settings"];
+  const sizes = [18, 36, 72];
+  const g = document.getElementById("grid");
+  const cell = (cls, html) => { const d = document.createElement("div"); d.className = cls; d.innerHTML = html; g.appendChild(d); };
+  cell("label head", "");
+  for (const n of names) cell("head", n);
+  for (const s of sizes) {
+    cell("label", s + " px");
+    for (const n of names) cell("", `<svg class="i" width="${s}" height="${s}" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#${n}"/></svg>`);
+  }
+</script>
+</body>
+</html>

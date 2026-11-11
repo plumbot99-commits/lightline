@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <!-- The words come from the DRAFT copy (src/copy.ts) and the address from PAGE_URL (vite.page.config.ts). -->
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{description}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{url}}" />
+    <meta property="og:title" content="{{pageTitle}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:image" content="{{url}}og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="{{ogImageAlt}}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="./src/icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@300;500;600;700&display=swap"
+    />
+  </head>
+  <body>
+    <main id="root"></main>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>
