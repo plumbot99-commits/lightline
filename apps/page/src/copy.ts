@@ -12,6 +12,8 @@ export const DRAFT = {
   title: 'Lightline',
   byline: 'A Video.js v10 skin by',
   studio: 'FredericK DesigN StudiO',
+  /** The studio's name is the way back to its site (his word of 2026-11-10: a link back to the hero). */
+  studioUrl: 'https://frederickdesign.studio/',
   intro:
     'Controls drawn as thin lines of light on a dark ground, and the film’s own color spilling past the frame. Two layouts: Cinema for watching, Suite for working on a film.',
   /** Free, in the licence's own terms, with the code's address (his word of 2026-11-10: launch it for free, link the repo). */

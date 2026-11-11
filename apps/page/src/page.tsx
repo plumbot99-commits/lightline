@@ -314,7 +314,10 @@ export function Page() {
           <span className="page-wordmark">{DRAFT.title}</span>
         </h1>
         <p className="page-byline">
-          {DRAFT.byline} <span className="page-studio">{DRAFT.studio}</span>
+          {DRAFT.byline}{' '}
+          <a className="page-studio" href={DRAFT.studioUrl}>
+            {DRAFT.studio}
+          </a>
         </p>
         <p className="page-intro">{DRAFT.intro}</p>
         <p className="page-free">

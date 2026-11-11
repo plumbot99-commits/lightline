@@ -118,6 +118,23 @@ body {
   margin: 16px 0 0;
 }
 
+/* The name is the link back to the studio, so it reads as one: a thin line under it in the page's cyan. */
+a.page-studio {
+  text-decoration: underline;
+  text-decoration-color: rgb(110 232 233 / 0.6);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+a.page-studio:hover {
+  color: var(--cyan);
+}
+
+.page-studio:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
 /* Free, and where the code is. */
 .page-free {
   max-inline-size: 44rem;
